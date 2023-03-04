@@ -20,7 +20,7 @@ export class WorkspaceMember extends CUDate {
   userId: number;
   @Column({ type: "int", name: "workspaceId" })
   workspaceId: number;
-  @Column({ type: "date", name: "loggedInAt" })
+  @Column({ type: "date", name: "loggedInAt", default: null })
   loggedInAt: Date;
 
   @ManyToOne(() => User, (user) => user.Workspaces, {
