@@ -10,6 +10,7 @@ import {
   Res,
   UseInterceptors,
   UseGuards,
+  Next,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
 import { CreateUserDto } from "./dto/create-user.dto";
@@ -20,6 +21,7 @@ import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
 import { NotLoggedInGuard } from "src/auth/not-logged-in-guard";
 import { User } from "src/common/decorators/user.decorator";
+import { nextTick } from "process";
 
 @UseInterceptors(ProcessResponseDataInterceptor)
 @ApiTags("USER")
@@ -46,10 +48,13 @@ export class UsersController {
   @ApiOperation({ summary: "로그아웃" })
   @UseGuards(LoggedInGuard)
   @Post("logout")
-  logOut(@Req() req, @Res() res) {
-    req.logOut();
-    res.clearCookies("connect.sid", { httpOnly: true });
-    res.send("ok");
+  logOut(@Req() req, @Res() res, @Next() next) {
+    req.logOut((error) => {
+      if (error) {
+        return next(error);
+      }
+      return res.send("ok");
+    });
   }
 
   @ApiOperation({ summary: "회원가입" })

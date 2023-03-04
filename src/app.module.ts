@@ -28,7 +28,6 @@ import { AuthModule } from "./auth/auth.module";
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    AuthModule,
     MorganModule,
     UsersModule,
     WorkspacesModule,
