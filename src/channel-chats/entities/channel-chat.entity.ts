@@ -11,6 +11,8 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
 @Index("channelId", ["channelId"], {})
 @Index("userId", ["userId"], {})
@@ -22,6 +24,13 @@ export class ChannelChat extends CUDate {
   channelId: number;
   @Column({ type: "int", name: "userId" })
   userId: number;
+
+  @ApiProperty({
+    required: true,
+    description: "채팅 메세지",
+  })
+  @IsString()
+  @IsNotEmpty()
   @Column({ type: "text", name: "content" })
   content: string;
 

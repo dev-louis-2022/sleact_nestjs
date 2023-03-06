@@ -20,8 +20,7 @@ import { processResponseData as ProcessResponseDataInterceptor } from "src/commo
 import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
 import { NotLoggedInGuard } from "src/auth/not-logged-in-guard";
-import { User } from "src/common/decorators/user.decorator";
-import { nextTick } from "process";
+import { LogInUserDto } from "./dto/login-user.dto";
 
 @UseInterceptors(ProcessResponseDataInterceptor)
 @ApiTags("USER")
@@ -40,9 +39,8 @@ export class UsersController {
   })
   @UseGuards(LocalAuthGuard)
   @Post("login")
-  logIn(@User() user) {
-    console.log(user);
-    return user;
+  logIn(@Body() loginUserDto: LogInUserDto) {
+    return null;
   }
 
   @ApiOperation({ summary: "로그아웃" })

@@ -20,10 +20,10 @@ export class WorkspaceMember extends CUDate {
   userId: number;
   @Column({ type: "int", name: "workspaceId" })
   workspaceId: number;
-  @Column({ type: "date", name: "loggedInAt", default: null })
+  @Column({ type: "date", name: "loggedInAt", nullable: true })
   loggedInAt: Date;
 
-  @ManyToOne(() => User, (user) => user.Workspaces, {
+  @ManyToOne(() => User, (user) => user.WorkspaceMembers, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })

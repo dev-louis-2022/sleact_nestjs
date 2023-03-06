@@ -13,16 +13,32 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
+import { IsString, MaxLength } from "class-validator";
+import { ApiProperty } from "@nestjs/swagger";
 
 @Index("ownerId", ["ownerId"], {})
 @Entity({ schema: "sleact", name: "workspace" })
 export class Workspace extends CUDDate {
   @PrimaryGeneratedColumn({ type: "int", name: "id" })
   id: number;
+
+  @IsString()
+  @ApiProperty({
+    example: "workspace-0001@workspace.com",
+    description: "워크스페이스 URL",
+  })
   @Column({ type: "varchar", name: "url" })
   url: string;
+
+  @IsString()
+  @MaxLength(20)
+  @ApiProperty({
+    example: "워크스페이스(회사)",
+    description: "워크스페이스 이름",
+  })
   @Column({ type: "varchar", name: "name" })
   name: string;
+
   @Column({ type: "int", name: "ownerId", nullable: true })
   ownerId: number;
 

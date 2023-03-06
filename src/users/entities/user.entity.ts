@@ -62,7 +62,7 @@ export class User extends CUDDate {
   ReceivedMention: Mention[];
 
   @OneToMany(() => WorkspaceMember, (workspaceMember) => workspaceMember.User)
-  Workspaces: WorkspaceMember[];
+  WorkspaceMembers: WorkspaceMember[];
 
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.User)
   Channels: ChannelMember[];
