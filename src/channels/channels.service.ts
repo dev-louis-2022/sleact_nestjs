@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException, UseInterceptors } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ChannelChat } from "src/channel-chats/entities/channel-chat.entity";
 import { EventsGateway } from "src/events/events.gateway";
+import { User } from "src/users/entities/user.entity";
 import { Repository } from "typeorm";
 import { CreateChannelDto } from "./dto/create-channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
@@ -42,6 +43,38 @@ export class ChannelsService {
       .emit("message", chat);
 
     return chat;
+  }
+
+  async createWorkspaceChannelImages(
+    url: string,
+    name: string,
+    files: Express.Multer.File[],
+    user: User
+  ) {
+    console.log(files);
+    const channel = await this.channelRepository
+      .createQueryBuilder("channel")
+      .innerJoin("channel.Workspace", "W", "W.url = :url", { url })
+      .where("channel.name = :name", { name })
+      .getOne();
+
+    if (!channel) {
+      throw new NotFoundException("채널이 존재하지 않습니다.");
+    }
+    for (let i = 0; i < files.length; i++) {
+      const chats = new ChannelChat();
+      chats.content = files[i].path;
+      chats.userId = user.id;
+      chats.channelId = channel.id;
+      const chat = await this.channelChatRepository.save(chats);
+      chat.Channel = channel;
+      chat.User = user;
+
+      this.eventsGateway.server
+        .to(`/ws-${url}-${channel.id}`)
+        .emit("message", chat);
+    }
+    return null;
   }
 
   create(createChannelDto: CreateChannelDto) {
