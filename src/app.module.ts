@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MorganModule } from "nest-morgan";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MorganInterceptor } from "nest-morgan/morgan.interceptor.mixin";
@@ -11,18 +11,15 @@ import { ChannelsModule } from "./channels/channels.module";
 import { DmsModule } from "./dms/dms.module";
 
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./users/entities/user.entity";
-import { Dm } from "./dms/entities/dm.entity";
-import { Channel } from "./channels/entities/channel.entity";
-import { Workspace } from "./workspaces/entities/workspace.entity";
-import { ChannelMembersModule } from "./channel-members/channel-members.module";
+import { User } from "./entities/user.entity";
+import { Dm } from "./entities/dm.entity";
+import { Channel } from "./entities/channel.entity";
+import { Workspace } from "./entities/workspace.entity";
 import { MentionsModule } from "./mentions/mentions.module";
-import { WorkspaceMembersModule } from "./workspace-members/workspace-members.module";
-import { ChannelChatsModule } from "./channel-chats/channel-chats.module";
-import { ChannelChat } from "./channel-chats/entities/channel-chat.entity";
-import { ChannelMember } from "./channel-members/entities/channel-member.entity";
-import { Mention } from "./mentions/entities/mention.entity";
-import { WorkspaceMember } from "./workspace-members/entities/workspace-member.entity";
+import { ChannelChat } from "./entities/channel-chat.entity";
+import { ChannelMember } from "./entities/channel-member.entity";
+import { Mention } from "./entities/mention.entity";
+import { WorkspaceMember } from "./entities/workspace-member.entity";
 import { AuthModule } from "./auth/auth.module";
 
 @Module({
@@ -33,10 +30,7 @@ import { AuthModule } from "./auth/auth.module";
     WorkspacesModule,
     ChannelsModule,
     DmsModule,
-    ChannelMembersModule,
     MentionsModule,
-    WorkspaceMembersModule,
-    ChannelChatsModule,
     TypeOrmModule.forRoot({
       type: "mysql",
       host: process.env.DB_HOST,

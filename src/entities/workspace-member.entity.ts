@@ -1,6 +1,6 @@
-import { CUDate } from "../../common/entities/CUDate.entity";
-import { User } from "../../users/entities/user.entity";
-import { Workspace } from "../../workspaces/entities/workspace.entity";
+import { CUDate } from "../common/entities/CUDate.entity";
+import { User } from "./user.entity";
+import { Workspace } from "./workspace.entity";
 import {
   Column,
   Entity,

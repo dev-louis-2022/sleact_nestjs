@@ -1,11 +1,16 @@
-import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  HttpException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DataSource, Repository } from "typeorm";
 import { UpdateUserDto } from "./dto/update-user.dto";
-import { User } from "./entities/user.entity";
+import { User } from "../entities/user.entity";
 import bcrypt from "bcrypt";
-import { WorkspaceMember } from "src/workspace-members/entities/workspace-member.entity";
-import { ChannelMember } from "src/channel-members/entities/channel-member.entity";
+import { ChannelMember } from "src/entities/channel-member.entity";
+import { WorkspaceMember } from "src/entities/workspace-member.entity";
 
 @Injectable()
 export class UsersService {
@@ -68,6 +73,13 @@ export class UsersService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async findByEmail(email: string) {
+    return await this.usersRepository.findOne({
+      where: { email },
+      select: ["id", "email", "password"],
+    });
   }
 
   findAll() {

@@ -1,11 +1,11 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { ChannelChat } from "../../channel-chats/entities/channel-chat.entity";
-import { ChannelMember } from "../../channel-members/entities/channel-member.entity";
-import { CUDDate } from "../../common/entities/CUDDate.entity";
-import { Dm } from "../../dms/entities/dm.entity";
-import { Mention } from "../../mentions/entities/mention.entity";
-import { WorkspaceMember } from "../../workspace-members/entities/workspace-member.entity";
-import { Workspace } from "../../workspaces/entities/workspace.entity";
+import { ChannelChat } from "./channel-chat.entity";
+import { ChannelMember } from "./channel-member.entity";
+import { CUDDate } from "../common/entities/CUDDate.entity";
+import { Dm } from "./dm.entity";
+import { Mention } from "./mention.entity";
+import { WorkspaceMember } from "./workspace-member.entity";
+import { Workspace } from "./workspace.entity";
 import {
   Column,
   Entity,

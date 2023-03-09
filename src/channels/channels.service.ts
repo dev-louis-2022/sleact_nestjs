@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException, UseInterceptors } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { ChannelChat } from "src/channel-chats/entities/channel-chat.entity";
+import { ChannelChat } from "src/entities/channel-chat.entity";
 import { EventsGateway } from "src/events/events.gateway";
-import { User } from "src/users/entities/user.entity";
+import { User } from "src/entities/user.entity";
 import { Repository } from "typeorm";
 import { CreateChannelDto } from "./dto/create-channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
-import { Channel } from "./entities/channel.entity";
+import { Channel } from "../entities/channel.entity";
 
 @Injectable()
 export class ChannelsService {

@@ -1,9 +1,9 @@
-import { Channel } from "../../channels/entities/channel.entity";
-import { CUDDate } from "../../common/entities/CUDDate.entity";
-import { Dm } from "../../dms/entities/dm.entity";
-import { Mention } from "../../mentions/entities/mention.entity";
-import { User } from "../../users/entities/user.entity";
-import { WorkspaceMember } from "../../workspace-members/entities/workspace-member.entity";
+import { Channel } from "./channel.entity";
+import { CUDDate } from "../common/entities/CUDDate.entity";
+import { Dm } from "./dm.entity";
+import { Mention } from "./mention.entity";
+import { User } from "./user.entity";
+import { WorkspaceMember } from "./workspace-member.entity";
 import {
   Column,
   Entity,

@@ -1,13 +1,13 @@
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import { User } from "./src/users/entities/user.entity";
-import { Dm } from "./src/dms/entities/dm.entity";
-import { Channel } from "./src/channels/entities/channel.entity";
-import { Workspace } from "./src/workspaces/entities/workspace.entity";
-import { ChannelChat } from "./src/channel-chats/entities/channel-chat.entity";
-import { ChannelMember } from "./src/channel-members/entities/channel-member.entity";
-import { Mention } from "./src/mentions/entities/mention.entity";
-import { WorkspaceMember } from "./src/workspace-members/entities/workspace-member.entity";
+import { User } from "./src/entities/user.entity";
+import { Dm } from "./src/entities/dm.entity";
+import { Channel } from "./src/entities/channel.entity";
+import { Workspace } from "./src/entities/workspace.entity";
+import { ChannelChat } from "./src/entities/channel-chat.entity";
+import { ChannelMember } from "./src/entities/channel-member.entity";
+import { Mention } from "./src/entities/mention.entity";
+import { WorkspaceMember } from "./src/entities/workspace-member.entity";
 
 dotenv.config();
 

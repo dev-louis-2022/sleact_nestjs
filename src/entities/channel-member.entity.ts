@@ -1,6 +1,6 @@
-import { Channel } from "../../channels/entities/channel.entity";
-import { CUDate } from "../../common/entities/CUDate.entity";
-import { User } from "../../users/entities/user.entity";
+import { Channel } from "./channel.entity";
+import { CUDate } from "../common/entities/CUDate.entity";
+import { User } from "./user.entity";
 import {
   Column,
   Entity,
