@@ -3,9 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Req,
   Res,
   UseInterceptors,
@@ -21,12 +18,20 @@ import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
 import { NotLoggedInGuard } from "src/auth/not-logged-in-guard";
 import { LogInUserDto } from "./dto/login-user.dto";
+import { UserDecoretor } from "src/common/decorators/user.decorator";
+import { User } from "src/entities/user.entity";
 
 @UseInterceptors(ProcessResponseDataInterceptor)
 @ApiTags("USER")
-@Controller("users")
+@Controller("api/users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @ApiOperation({ summary: "내 정보 가져오기" })
+  @Get()
+  async getProfile(@UserDecoretor() user: User) {
+    return user || false;
+  }
 
   @ApiOperation({ summary: "로그인" })
   @ApiResponse({
@@ -64,25 +69,5 @@ export class UsersController {
       createUserDto.nickname,
       createUserDto.password
     );
-  }
-
-  @Get("all")
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.usersService.remove(+id);
   }
 }

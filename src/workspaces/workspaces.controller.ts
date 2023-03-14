@@ -7,19 +7,26 @@ import {
   Param,
   Delete,
   UseGuards,
+  ParseIntPipe,
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./dto/create-workspace.dto";
-import { UpdateWorkspaceDto } from "./dto/update-workspace.dto";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { User } from "src/common/decorators/user.decorator";
+import { UserDecoretor } from "src/common/decorators/user.decorator";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
+import { User } from "src/entities/user.entity";
 
 @ApiTags("WORKSPACE")
 @UseGuards(LoggedInGuard)
-@Controller("workspaces")
+@Controller("api/workspaces")
 export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
+
+  @ApiOperation({ summary: "내 워크스페이스 가져오기" })
+  @Get()
+  async getMyWorkspaces(@UserDecoretor() user: User) {
+    return this.workspacesService.findMyWorkspaces(user.id);
+  }
 
   @ApiOperation({ summary: "워크스페이스 생성" })
   @ApiResponse({
@@ -31,7 +38,10 @@ export class WorkspacesController {
     description: "실패",
   })
   @Post()
-  async create(@User() user, @Body() createWorkspaceDto: CreateWorkspaceDto) {
+  async create(
+    @UserDecoretor() user,
+    @Body() createWorkspaceDto: CreateWorkspaceDto
+  ) {
     // dto 사용으로 validation 실행
     return await this.workspacesService.create(
       createWorkspaceDto.url,
@@ -40,26 +50,27 @@ export class WorkspacesController {
     );
   }
 
-  @Get()
-  async getMyWorkspaces(@User() user) {
-    return await this.workspacesService.findMyWorkspaces(user.id);
+  @ApiOperation({ summary: "워크스페이스 멤버 가져오기" })
+  @Get(":url/members")
+  async getWorkspaceMembers(@Param("url") url: string) {
+    return this.workspacesService.getWorkspaceMembers(url);
   }
 
-  @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.workspacesService.findOne(+id);
-  }
-
-  @Patch(":id")
-  update(
-    @Param("id") id: string,
-    @Body() updateWorkspaceDto: UpdateWorkspaceDto
+  @ApiOperation({ summary: "워크스페이스 멤버 초대하기" })
+  @Post(":url/members")
+  async createWorkspaceMembers(
+    @Param("url") url: string,
+    @Body("email") email: string
   ) {
-    return this.workspacesService.update(+id, updateWorkspaceDto);
+    return this.workspacesService.createWorkspaceMembers(url, email);
   }
 
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.workspacesService.remove(+id);
+  @ApiOperation({ summary: "워크스페이스 특정 멤버 가져오기" })
+  @Get(":url/members/:id")
+  async getWorkspaceMember(
+    @Param("url") url: string,
+    @Param("id", ParseIntPipe) id: number
+  ) {
+    return this.workspacesService.getWorkspaceMember(url, id);
   }
 }

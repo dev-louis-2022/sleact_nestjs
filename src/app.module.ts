@@ -1,4 +1,9 @@
-import { Module } from "@nestjs/common";
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
@@ -21,6 +26,7 @@ import { ChannelMember } from "./entities/channel-member.entity";
 import { Mention } from "./entities/mention.entity";
 import { WorkspaceMember } from "./entities/workspace-member.entity";
 import { AuthModule } from "./auth/auth.module";
+import { FrontendMiddleware } from "./middlewares/frontend.middleware";
 
 @Module({
   imports: [
@@ -69,4 +75,11 @@ import { AuthModule } from "./auth/auth.module";
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(FrontendMiddleware).forRoutes({
+      path: "/**",
+      method: RequestMethod.ALL,
+    });
+  }
+}
