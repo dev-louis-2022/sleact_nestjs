@@ -65,7 +65,7 @@ import { AuthModule } from "./auth/auth.module";
     },
     {
       provide: "CUSTOM_KEY",
-      useValue: "CUSTOM_VALUE",
+      useValue: "Hello World!",
     },
   ],
 })

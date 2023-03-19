@@ -6,7 +6,6 @@ import {
 } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { DataSource, Repository } from "typeorm";
-import { UpdateUserDto } from "./dto/update-user.dto";
 import { User } from "../entities/user.entity";
 import bcrypt from "bcrypt";
 import { ChannelMember } from "src/entities/channel-member.entity";
@@ -24,21 +23,22 @@ export class UsersService {
     private dataSource: DataSource
   ) {}
 
-  async create(email: string, nickname: string, password: string) {
+  async join(email: string, nickname: string, password: string) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
-    const user = await queryRunner.manager.getRepository(User).findOne({
-      where: { email },
-    });
-    if (user) {
-      throw new BadRequestException("이미 존재하는 사용자입니다.");
-    }
-    const hashedPassword = await bcrypt.hash(password, 12);
-
     try {
+      const user = await queryRunner.manager.getRepository(User).findOne({
+        where: { email },
+      });
+      console.log(user);
+      if (user) {
+        throw new BadRequestException("이미 존재하는 사용자입니다.");
+      }
+      const hashedPassword = await bcrypt.hash(password, 12);
+
       const tempUser = queryRunner.manager.getRepository(User).create();
       tempUser.email = email;
       tempUser.nickname = nickname;
@@ -67,7 +67,9 @@ export class UsersService {
         .save(channelMember);
 
       await queryRunner.commitTransaction();
+      return true;
     } catch (error) {
+      console.log(error);
       await queryRunner.rollbackTransaction();
       throw error;
     } finally {
@@ -80,21 +82,5 @@ export class UsersService {
       where: { email },
       select: ["id", "email", "password"],
     });
-  }
-
-  findAll() {
-    return `This action returns all users`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} user`;
   }
 }

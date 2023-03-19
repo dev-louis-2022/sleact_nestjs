@@ -3,46 +3,38 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
-  Delete,
   Req,
   Res,
   UseInterceptors,
   UseGuards,
   Next,
+  ForbiddenException,
 } from "@nestjs/common";
 import { UsersService } from "./users.service";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { CreateUserDto as JoinUserDto } from "./dto/create-user.dto";
+import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { processResponseData as ProcessResponseDataInterceptor } from "src/common/interceptors/processResponseData.interceptor";
 import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
 import { NotLoggedInGuard } from "src/auth/not-logged-in-guard";
+import { User } from "src/entities/user.entity";
+import { UserDecorator } from "src/common/decorators/user.decorator";
 import { LogInUserDto } from "./dto/login-user.dto";
 
 @UseInterceptors(ProcessResponseDataInterceptor)
 @ApiTags("USER")
-@Controller("users")
+@Controller("api/users")
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @ApiOperation({ summary: "로그인" })
-  @ApiResponse({
-    status: 200,
-    description: "성공",
-  })
-  @ApiResponse({
-    status: 500,
-    description: "실패",
-  })
   @UseGuards(LocalAuthGuard)
   @Post("login")
-  logIn(@Body() loginUserDto: LogInUserDto) {
-    return null;
+  logIn(@Body() user: LogInUserDto) {
+    return user;
   }
 
+  @ApiCookieAuth("connect.sid")
   @ApiOperation({ summary: "로그아웃" })
   @UseGuards(LoggedInGuard)
   @Post("logout")
@@ -57,32 +49,25 @@ export class UsersController {
 
   @ApiOperation({ summary: "회원가입" })
   @UseGuards(NotLoggedInGuard)
-  @Post("join")
-  async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.create(
+  @Post()
+  async join(@Body() createUserDto: JoinUserDto) {
+    const result = await this.usersService.join(
       createUserDto.email,
       createUserDto.nickname,
       createUserDto.password
     );
+
+    if (result) {
+      return "ok";
+    } else {
+      throw new ForbiddenException();
+    }
   }
 
-  @Get("all")
-  findAll() {
-    return this.usersService.findAll();
-  }
-
-  @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.usersService.findOne(+id);
-  }
-
-  @Patch(":id")
-  update(@Param("id") id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
-  }
-
-  @Delete(":id")
-  remove(@Param("id") id: string) {
-    return this.usersService.remove(+id);
+  @ApiCookieAuth("connect.sid")
+  @ApiOperation({ summary: "내 정보 조회" })
+  @Get()
+  async getProfile(@UserDecorator() user: User) {
+    return user || false;
   }
 }

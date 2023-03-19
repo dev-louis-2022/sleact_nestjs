@@ -7,45 +7,93 @@ import {
   Param,
   Delete,
   Query,
-} from '@nestjs/common';
-import { ApiParam, ApiTags } from '@nestjs/swagger';
-import { DmsService } from './dms.service';
-import { CreateDmDto } from './dto/create-dm.dto';
-import { UpdateDmDto } from './dto/update-dm.dto';
+  UploadedFiles,
+  UseInterceptors,
+} from "@nestjs/common";
+import { UseGuards } from "@nestjs/common/decorators";
+import { ParseIntPipe } from "@nestjs/common/pipes";
+import { FilesInterceptor } from "@nestjs/platform-express";
+import {
+  ApiCookieAuth,
+  ApiOperation,
+  ApiParam,
+  ApiTags,
+} from "@nestjs/swagger";
+import multer from "multer";
+import path from "path";
+import { LoggedInGuard } from "src/auth/logged-in-guard";
+import { UserDecorator } from "src/common/decorators/user.decorator";
+import { User } from "src/entities/user.entity";
+import { DmsService } from "./dms.service";
 
-@ApiTags('DM')
-@Controller('workspaces/:url/dms')
+@ApiCookieAuth("connect.sid")
+@UseGuards(LoggedInGuard)
+@ApiTags("DM")
+@Controller("api/workspaces")
 export class DmsController {
   constructor(private readonly dmsService: DmsService) {}
 
-  @Post(':id/chats')
-  create(@Body() createDmDto: CreateDmDto) {
-    return this.dmsService.create(createDmDto);
+  @ApiOperation({ summary: "워크스페이스 DM 모두 가져오기" })
+  @Get(":id/dms")
+  async getWorkspaceDMs(@Param("url") url, @UserDecorator() user: User) {
+    return this.dmsService.getWorkspaceDMs(url, user.id);
   }
 
-  @Get()
-  findAll() {
-    return this.dmsService.findAll();
+  @ApiOperation({ summary: "워크스페이스 특정 DM 채팅 모두 가져오기" })
+  @Get(":url/dms/:id/chats")
+  async getWorkspaceDMChats(
+    @Param("url") url,
+    @Param("id", ParseIntPipe) id: number,
+    @Query("perPage", ParseIntPipe) perPage: number,
+    @Query("page", ParseIntPipe) page: number
+  ) {
+    return this.dmsService.getWorkspaceDMChats(url, id, perPage, page);
   }
 
-  @ApiParam({
-    name: 'url',
-    required: true,
-    description: '워크스페이스 url',
-  })
-  @Get(':id/chats')
-  findOne(@Query() query, @Param('id') id: string) {
-    console.log(query.perPage, query.page);
-    return this.dmsService.findOne(+id);
+  @ApiOperation({ summary: "워크스페이스 특정 DM 채팅 생성하기" })
+  @Post(":url/dms/:id/chats")
+  async createWorkspaceDMChats(
+    @Param("url") url,
+    @Param("id", ParseIntPipe) id: number,
+    @Body("content") content,
+    @UserDecorator() user: User
+  ) {
+    return this.dmsService.createWorkspaceDMChats(url, id, content, user.id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDmDto: UpdateDmDto) {
-    return this.dmsService.update(+id, updateDmDto);
+  @ApiOperation({ summary: "워크스페이스 특정 DM 이미지 업로드하기" })
+  @UseInterceptors(
+    FilesInterceptor("image", 10, {
+      storage: multer.diskStorage({
+        destination(req, file, cb) {
+          cb(null, "uploads/");
+        },
+        filename(req, file, cb) {
+          const ext = path.extname(file.originalname);
+          cb(null, path.basename(file.originalname, ext) + Date.now() + ext);
+        },
+      }),
+      limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+    })
+  )
+  @Post(":url/dms/:id/images")
+  async createWorkspaceDMImages(
+    @Param("url") url,
+    @Param("id", ParseIntPipe) id: number,
+    @UploadedFiles() files: Express.Multer.File[],
+    @UserDecorator() user: User
+  ) {
+    return this.dmsService.createWorkspaceDMImages(url, files, id, user.id);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.dmsService.remove(+id);
+  @ApiOperation({ summary: "안 읽은 개수 가져오기" })
+  @Get(":url/dms/:id/unreads")
+  async getUnreads(
+    @Param("url") url,
+    @Param("id", ParseIntPipe) id: number,
+    @Query("after", ParseIntPipe) after: number,
+    @UserDecorator() user: User
+  ) {
+    return this.dmsService.getDMUnreadsCount(url, id, user.id, after);
   }
 }
