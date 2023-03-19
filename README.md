@@ -35,6 +35,22 @@ $ npm install
 $ npm i -f
 ```
 
+## Create Database with Docker
+
+```bash
+# check docker
+$ docker -v
+
+# download mysql docker image
+$ docker pull mysql:8.0.22
+
+# Create and run mysql docker container
+$ docker run --name mysql-container -e MYSQL_ROOT_PASSWORD=<password> -d -p 3306:3306 mysql:8.0.22
+
+# Connect mysql docker container
+$ docker exec -it mysql-container bash
+```
+
 ## Initial setting
 
 ```bash
