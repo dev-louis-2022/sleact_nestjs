@@ -1,26 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { CreateDmDto } from './dto/create-dm.dto';
-import { UpdateDmDto } from './dto/update-dm.dto';
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class DmsService {
-  create(createDmDto: CreateDmDto) {
-    return 'This action adds a new dm';
+  getWorkspaceDMs(url: any, id: number) {
+    throw new Error("Method not implemented.");
   }
-
-  findAll() {
-    return `This action returns all dms`;
+  getWorkspaceDMChats(url: any, id: number, perPage: number, page: number) {
+    throw new Error("Method not implemented.");
   }
-
-  findOne(id: number) {
-    return `This action returns a #${id} dm`;
+  createWorkspaceDMChats(url: any, id: number, content: any, id1: number) {
+    throw new Error("Method not implemented.");
   }
-
-  update(id: number, updateDmDto: UpdateDmDto) {
-    return `This action updates a #${id} dm`;
+  createWorkspaceDMImages(
+    url: any,
+    files: Express.Multer.File[],
+    id: number,
+    id1: number
+  ) {
+    throw new Error("Method not implemented.");
   }
-
-  remove(id: number) {
-    return `This action removes a #${id} dm`;
+  getDMUnreadsCount(url: any, id: number, id1: number, after: number) {
+    throw new Error("Method not implemented.");
   }
 }

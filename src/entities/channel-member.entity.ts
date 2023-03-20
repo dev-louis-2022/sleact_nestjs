@@ -21,7 +21,7 @@ export class ChannelMember extends CUDate {
   @Column({ type: "int", name: "channelId" })
   channelId: number;
 
-  @ManyToOne(() => User, (user) => user.Channels, {
+  @ManyToOne(() => User, (user) => user.ChannelMembers, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })

@@ -13,18 +13,23 @@ import {
   ParseIntPipe,
 } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
-import { UserDecoretor } from "src/common/decorators/user.decorator";
+import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { UserDecorator } from "src/common/decorators/user.decorator";
 import { ChannelsService } from "./channels.service";
 import { CreateChannelDto } from "./dto/create-channel.dto";
 import multer from "multer";
 import path from "path";
+import { Query, UseGuards } from "@nestjs/common/decorators";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
 import { User } from "src/entities/user.entity";
+import { ParseIntPipe } from "@nestjs/common/pipes";
+import { processResponseData as ProcessResponseDataInterceptor } from "src/common/interceptors/processResponseData.interceptor";
 
-@ApiTags("CHANNEL")
+@UseInterceptors(ProcessResponseDataInterceptor)
+@ApiCookieAuth("connect.sid")
 @UseGuards(LoggedInGuard)
-@Controller("api/channels")
+@ApiTags("CHANNEL")
+@Controller("api/workspaces")
 export class ChannelsController {
   constructor(private readonly channelsService: ChannelsService) {}
 
@@ -32,7 +37,7 @@ export class ChannelsController {
   @Get(":url/channels")
   async getWorkspaceChannels(
     @Param("url") url: string,
-    @UserDecoretor() user: User
+    @UserDecorator() user: User
   ) {
     return this.channelsService.getWorkspaceChannels(url, user.id);
   }
@@ -49,9 +54,9 @@ export class ChannelsController {
   @ApiOperation({ summary: "워크스페이스 채널 만들기" })
   @Post(":url/channels")
   async createWorkspaceChannels(
-    @Param("url") url,
+    @Param("url") url: string,
     @Body() body: CreateChannelDto,
-    @UserDecoretor() user: User
+    @UserDecorator() user: User
   ) {
     return this.channelsService.createWorkspaceChannels(
       url,
@@ -62,7 +67,7 @@ export class ChannelsController {
 
   @ApiOperation({ summary: "워크스페이스 채널 멤버 가져오기" })
   @Get(":url/channels/:name/members")
-  async getWorkspaceMembers(
+  async getWorkspaceChannelMembers(
     @Param("url") url: string,
     @Param("name") name: string
   ) {
@@ -71,7 +76,7 @@ export class ChannelsController {
 
   @ApiOperation({ summary: "워크스페이스 채널 멤버 초대하기" })
   @Post(":url/channels/:name/members")
-  async createWorkspaceMembers(
+  async createWorkspaceChannelMembers(
     @Param("url") url: string,
     @Param("name") name: string,
     @Body("email") email: string
@@ -97,13 +102,18 @@ export class ChannelsController {
 
   @ApiOperation({ summary: "워크스페이스 특정 채널 채팅 생성하기" })
   @Post(":url/channels/:name/chats")
-  async createWorkspaceChannelChats(
-    @Param("url") url,
-    @Param("name") name,
+  async createWorkspaceChannelChat(
+    @Param("url") url: string,
+    @Param("name") name: string,
     @Body("content") content,
-    @UserDecoretor() user
+    @UserDecorator() user: User
   ) {
-    return await this.channelsService.postChat(url, name, content, user);
+    return this.channelsService.createWorkspaceChannelChat(
+      url,
+      name,
+      content,
+      user
+    );
   }
 
   @ApiOperation({ summary: "워크스페이스 특정 채널 이미지 업로드하기" })
@@ -122,11 +132,11 @@ export class ChannelsController {
     })
   )
   @Post(":url/channels/:name/images")
-  async postImages(
-    @UploadedFiles() files: Express.Multer.File[],
+  async createWorkspaceChannelImages(
     @Param("url") url: string,
     @Param("name") name: string,
-    @UserDecoretor() user
+    @UploadedFiles() files: Express.Multer.File[],
+    @UserDecorator() user
   ) {
     return await this.channelsService.createWorkspaceChannelImages(
       url,
@@ -138,11 +148,15 @@ export class ChannelsController {
 
   @ApiOperation({ summary: "안 읽은 개수 가져오기" })
   @Get(":url/channels/:name/unreads")
-  async getUnreads(
-    @Param("url") url,
-    @Param("name") name,
+  async getWorkspaceChannelChatUnreadsCount(
+    @Param("url") url: string,
+    @Param("name") name: string,
     @Query("after", ParseIntPipe) after: number
   ) {
-    return this.channelsService.getChannelUnreadsCount(url, name, after);
+    return this.channelsService.getWorkspaceChannelChatUnreadsCount(
+      url,
+      name,
+      after
+    );
   }
 }

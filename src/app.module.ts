@@ -71,7 +71,7 @@ import { FrontendMiddleware } from "./middlewares/frontend.middleware";
     },
     {
       provide: "CUSTOM_KEY",
-      useValue: "CUSTOM_VALUE",
+      useValue: "Hello World!",
     },
   ],
 })

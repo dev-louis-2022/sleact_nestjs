@@ -38,7 +38,7 @@ async function bootstrap() {
   app.use(
     session({
       resave: false,
-      saveUnintialized: false,
+      saveUninitialized: false,
       secret: process.env.COOKIE_SECRET,
       cookie: {
         httpOnly: true,

@@ -5,6 +5,7 @@ import { User } from "src/entities/user.entity";
 import { WorkspaceMember } from "src/entities/workspace-member.entity";
 import { DataSource, Repository } from "typeorm";
 import { Workspace } from "../entities/workspace.entity";
+import { Channel } from "src/entities/channel.entity";
 
 @Injectable()
 export class WorkspacesService {
@@ -32,26 +33,42 @@ export class WorkspacesService {
     });
   }
 
-  async create(url: string, name: string, ownerId: number) {
+  async create(url: string, name: string, myId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // workspace, workspaceMember
-      const workspace = await this.dataSource.manager
+      const workspace = new Workspace();
+      workspace.url = url;
+      workspace.name = name;
+      workspace.ownerId = myId;
+      const savedWorkspace = await this.dataSource.manager
         .getRepository(Workspace)
-        .save({
-          url,
-          name,
-          ownerId,
-        });
-      const workspaceMember = await this.dataSource.manager
+        .save(workspace);
+
+      const workspaceMember = new WorkspaceMember();
+      workspaceMember.workspaceId = savedWorkspace.id;
+      workspaceMember.userId = myId;
+      await this.dataSource.manager
         .getRepository(WorkspaceMember)
-        .save({
-          workspaceId: workspace.id,
-          userId: workspace.ownerId,
-        });
+        .save(workspaceMember);
+
+      // channel, channelMember
+      const channel = new Channel();
+      channel.name = "일반";
+      channel.workspaceId = savedWorkspace.id;
+      const savedChannel = await this.dataSource.manager
+        .getRepository(Channel)
+        .save(channel);
+
+      const channelMember = new ChannelMember();
+      channelMember.channelId = savedChannel.id;
+      channelMember.userId = myId;
+      await this.dataSource.manager
+        .getRepository(ChannelMember)
+        .save(channelMember);
 
       await queryRunner.commitTransaction();
     } catch (error) {
@@ -64,50 +81,67 @@ export class WorkspacesService {
 
   async getWorkspaceMembers(url: string) {
     return this.userRepository
-      .createQueryBuilder("U")
-      .innerJoin("U.WorkspaceMembers", "WM")
-      .innerJoin("WM.Workspace", "W", "url = :url", { url })
+      .createQueryBuilder("user")
+      .innerJoin("user.WorkspaceMembers", "members")
+      .innerJoin("members.Workspace", "workspace", "workspace.url = :url", {
+        url,
+      })
       .getMany();
-  }
-
-  async createWorkspaceMembers(url: string, email: any) {
-    const workspace = await this.workspaceRepository
-      .createQueryBuilder("workspace")
-      .where("workspace.url = :url", { url })
-      .innerJoinAndSelect("workspace.Channels", "channels")
-      .getOne();
-
-    const user = await this.userRepository.findOne({ where: { email } });
-    if (!user) {
-      throw new NotFoundException("없는 사용자 입니다.");
-    }
-
-    const workspaceMember = new WorkspaceMember();
-    workspaceMember.workspaceId = workspace.id;
-    workspaceMember.userId = user.id;
-    await this.workspaceMemberRepository.save(workspaceMember);
-
-    const channelMember = new ChannelMember();
-    channelMember.channelId = workspace.Channels.find(
-      (v) => v.name === "일반"
-    ).id;
-    channelMember.userId = user.id;
-    await this.channelMemberRepository.save(channelMember);
-
-    return null;
   }
 
   async getWorkspaceMember(url: string, id: number) {
     return this.userRepository
       .createQueryBuilder("user")
       .where("user.id = :id", { id })
-      .innerJoin("user.WorkspaceMembers", "workspaceMembers")
-      .innerJoin(
-        "workspaceMembers.Workspace",
-        "workspace",
-        "workspace.url = :url",
-        { url }
-      )
+      .innerJoin("user.OwnerWorkspaces", "workspace", "workspace.url = :url", {
+        url,
+      })
       .getOne();
+  }
+
+  async createWorkspaceMembers(url: string, email: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const workspace = await queryRunner.manager
+        .getRepository(Workspace)
+        .createQueryBuilder("workspace")
+        .where("workspace.url = :url", { url })
+        .innerJoinAndSelect("workspace.Channels", "channel")
+        .getOne();
+
+      const user = await queryRunner.manager
+        .getRepository(User)
+        .findOneBy({ email });
+      if (!user) {
+        throw new NotFoundException();
+      }
+      // workspaceMember, channelMember
+      const workspaceMember = new WorkspaceMember();
+      workspaceMember.workspaceId = workspace.id;
+      workspaceMember.userId = user.id;
+      await queryRunner.manager
+        .getRepository(WorkspaceMember)
+        .save(workspaceMember);
+
+      const channelMember = new ChannelMember();
+      channelMember.channelId = workspace.Channels.find(
+        (v) => v.name === "일반"
+      ).id;
+      channelMember.userId = user.id;
+      await queryRunner.manager
+        .getRepository(ChannelMember)
+        .save(channelMember);
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (error) {
+      console.log(error);
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }

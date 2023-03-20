@@ -65,7 +65,7 @@ export class User extends CUDDate {
   WorkspaceMembers: WorkspaceMember[];
 
   @OneToMany(() => ChannelMember, (channelMember) => channelMember.User)
-  Channels: ChannelMember[];
+  ChannelMembers: ChannelMember[];
 
   @OneToMany(() => ChannelChat, (channelChat) => channelChat.User)
   ChannelChats: ChannelChat[];

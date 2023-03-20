@@ -11,11 +11,15 @@ import {
 } from "@nestjs/common";
 import { WorkspacesService } from "./workspaces.service";
 import { CreateWorkspaceDto } from "./dto/create-workspace.dto";
-import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
-import { UserDecoretor } from "src/common/decorators/user.decorator";
+import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { UserDecorator } from "src/common/decorators/user.decorator";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
+import { processResponseData as ProcessResponseDataInterceptor } from "src/common/interceptors/processResponseData.interceptor";
+import { UseInterceptors } from "@nestjs/common/decorators";
 import { User } from "src/entities/user.entity";
 
+@UseInterceptors(ProcessResponseDataInterceptor)
+@ApiCookieAuth("connect.sid")
 @ApiTags("WORKSPACE")
 @UseGuards(LoggedInGuard)
 @Controller("api/workspaces")
@@ -24,22 +28,14 @@ export class WorkspacesController {
 
   @ApiOperation({ summary: "내 워크스페이스 가져오기" })
   @Get()
-  async getMyWorkspaces(@UserDecoretor() user: User) {
+  async getMyWorkspaces(@UserDecorator() user: User) {
     return this.workspacesService.findMyWorkspaces(user.id);
   }
 
   @ApiOperation({ summary: "워크스페이스 생성" })
-  @ApiResponse({
-    status: 200,
-    description: "성공",
-  })
-  @ApiResponse({
-    status: 500,
-    description: "실패",
-  })
   @Post()
   async create(
-    @UserDecoretor() user,
+    @UserDecorator() user,
     @Body() createWorkspaceDto: CreateWorkspaceDto
   ) {
     // dto 사용으로 validation 실행
@@ -65,7 +61,7 @@ export class WorkspacesController {
     return this.workspacesService.createWorkspaceMembers(url, email);
   }
 
-  @ApiOperation({ summary: "워크스페이스 특정 멤버 가져오기" })
+  @ApiOperation({ summary: "워크스페이스 특정멤버 가져오기" })
   @Get(":url/members/:id")
   async getWorkspaceMember(
     @Param("url") url: string,
