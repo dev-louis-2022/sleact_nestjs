@@ -10,27 +10,6 @@ import { Workspace } from "src/entities/workspace.entity";
 
 @Injectable()
 export class ChannelsService {
-  getChannelUnreadsCount(url: any, name: any, after: number) {
-    throw new Error("Method not implemented.");
-  }
-  getWorkspaceChannelChats(url: any, name: any, perPage: number, page: number) {
-    throw new Error("Method not implemented.");
-  }
-  createWorkspaceChannelMembers(url: string, name: string, email: string) {
-    throw new Error("Method not implemented.");
-  }
-  getWorkspaceChannelMembers(url: string, name: string) {
-    throw new Error("Method not implemented.");
-  }
-  createWorkspaceChannels(url: any, name: string, id: number) {
-    throw new Error("Method not implemented.");
-  }
-  getWorkspaceChannel(url: string, name: string) {
-    throw new Error("Method not implemented.");
-  }
-  getWorkspaceChannels(url: string, id: number) {
-    throw new Error("Method not implemented.");
-  }
   constructor(
     @InjectRepository(Channel)
     private readonly channelRepository: Repository<Channel>,

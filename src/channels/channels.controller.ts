@@ -19,10 +19,8 @@ import { ChannelsService } from "./channels.service";
 import { CreateChannelDto } from "./dto/create-channel.dto";
 import multer from "multer";
 import path from "path";
-import { Query, UseGuards } from "@nestjs/common/decorators";
 import { LoggedInGuard } from "src/auth/logged-in-guard";
 import { User } from "src/entities/user.entity";
-import { ParseIntPipe } from "@nestjs/common/pipes";
 import { processResponseData as ProcessResponseDataInterceptor } from "src/common/interceptors/processResponseData.interceptor";
 
 @UseInterceptors(ProcessResponseDataInterceptor)
